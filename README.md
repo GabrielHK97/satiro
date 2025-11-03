@@ -1,20 +1,20 @@
-# Serafim
+# Satiro
 
 ### Why Satiro?
 
-Satiro is a small toolkit focused on schema assertions for Zod. The name is a play on the Portuguese word for Satyr and also stands for **S**chema **A**ssertion **T**ool and custom **I**mplementation for Zod's **R**ules and **O**bjects.
+Satiro is a small toolkit focused on password validation for Zod. The name is a play on the Portuguese word for Satyr and also stands for **S**chema **A**ssertion **T**ool and custom **I**mplementation for Zod's **R**ules and **O**bjects.
 
 ### What is the purpose of this package?
 
 This package provides a compact set of utilities to simplify password validation with Zod:
 
 - A schema creator that returns a Zod schema configured for password rules (length, character classes, etc.).
-- A standalone validator that runs password checks and returns a structured result (valid + errors/criteria).
-- A small React-friendly hook to evaluate password criteria in real time (useful for password inputs and UI feedback).
+- A standalone validator that runs password checks and returns a detailed structured result with validation status and character counts.
+- Predefined password criteria examples for common use cases.
 
 These utilities make it easy to create consistent password assertions across validation layers (forms, APIs, unit tests) while keeping the rules declarative and reusable.
 
-### Instalation
+### Installation
 
 ```
 npm install --save satiro
@@ -22,77 +22,68 @@ npm install --save satiro
 
 ### Introduction and Usage
 
-Below are short examples showing the three main pieces: schema creator, validator, and hook.
+Below are examples showing the three main functions: schema creator and validator.
 
-Schema creator (Zod):
+#### Schema creator (Zod):
 
-```jsx
+```typescript
 import { z } from 'zod';
-import { createPasswordSchema } from 'satiro';
+import { createPasswordSchema, PasswordCriteriaExamplesEnum } from 'satiro';
 
-// create a Zod schema for passwords with common requirements
+// Create a Zod schema for passwords with custom requirements
 const passwordSchema = createPasswordSchema({
   minLength: 8,
   maxLength: 128,
-  requireUppercase: true,
-  requireLowercase: true,
-  requireNumber: true,
-  requireSpecial: true,
-});
+  minUppercase: 1,
+  minLowercase: 1,
+  minDigits: 1,
+  minSpecialChars: 1,
+}, 'Password does not meet the required criteria');
 
-// use with zod
+// Use with Zod
 const result = passwordSchema.safeParse('P@ssw0rd');
 if (!result.success) {
   console.log(result.error.format());
 }
+
+// Or use predefined criteria
+const strongPasswordSchema = createPasswordSchema(
+  PasswordCriteriaExamplesEnum.STRONG,
+  'Password must be strong'
+);
 ```
 
-Standalone validator:
+#### Standalone validator:
 
-```jsx
-import { validatePassword } from 'satiro';
+```typescript
+import { validatePassword, PasswordCriteriaExamplesEnum } from 'satiro';
 
-const check = validatePassword('P@ssw0rd', {
+const validation = validatePassword('P@ssw0rd', {
   minLength: 8,
-  requireNumber: true,
-  requireUppercase: true,
+  minDigits: 1,
+  minUppercase: 1,
+  minSpecialChars: 1,
 });
 
-console.log(check.valid); // true/false
-console.log(check.errors); // array of human-friendly messages or codes
+console.log(validation.isValid);
+console.log(validation.details);
+
+const basicValidation = validatePassword('mypassword', PasswordCriteriaExamplesEnum.BASIC);
 ```
 
-React hook for realtime UI feedback:
+#### Predefined Criteria Examples
+```typescript
+PasswordCriteriaExamplesEnum.BASIC = {
+  minLength: 6
+};
 
-```jsx
-import React from 'react';
-import { usePasswordCriteria } from 'satiro';
-
-function PasswordInput() {
-  const { value, setValue, criteria } = usePasswordCriteria({
-    minLength: 8,
-    requireNumber: true,
-    requireUppercase: true,
-  });
-
-  return (
-    <div>
-      <input
-        type="password"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="Enter password"
-      />
-      <ul>
-        {criteria.map((c) => (
-          <li key={c.id} style={{ color: c.passed ? 'green' : 'red' }}>
-            {c.label}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+PasswordCriteriaExamplesEnum.STRONG = {
+  minLength: 8,
+  minUppercase: 1,
+  minLowercase: 1,
+  minDigits: 1,
+  minSpecialChars: 1
+};
 ```
 
 Why use these utilities?

@@ -95,9 +95,4 @@ function createPasswordSchema(criteria: PasswordCriteria = {}, message = '') {
     { message }
   );
 }
-
-function usePasswordValidation(password: string, criteria: PasswordCriteria = {}) {
-  return validatePassword(password, criteria);
-}
-
-export {  PasswordCriteriaExamplesEnum, validatePassword, createPasswordSchema, usePasswordValidation };
+export {  PasswordCriteriaExamplesEnum, validatePassword, createPasswordSchema };
