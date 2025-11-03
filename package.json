@@ -2,7 +2,10 @@
   "name": "satiro",
   "version": "1.0.4",
   "description": "A library for custom password criteria for Zod",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "types": "lib/index.d.ts",
   "scripts": {
     "launch": "tsc && npm publish"

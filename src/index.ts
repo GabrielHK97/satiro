@@ -94,9 +94,6 @@ import { PasswordCriteriaErrorsEnum } from './enums/password-criteria-errors.enu
   };
 }
 
-
-
-// Zod schema factory for password validation
 function createPasswordSchema(criteria: PasswordCriteria = {}, message = '') {
   return z.string().refine(
     (password: string) => {
@@ -107,7 +104,6 @@ function createPasswordSchema(criteria: PasswordCriteria = {}, message = '') {
   );
 }
 
-// Hook for real-time password validation (if using in React components)
 function usePasswordValidation(password: string, criteria: PasswordCriteria = {}) {
   return validatePassword(password, criteria);
 }
