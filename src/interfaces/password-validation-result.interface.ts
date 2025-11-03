@@ -1,6 +1,5 @@
 export interface PasswordValidationResult {
   isValid: boolean;
-  errors: string[];
   details: {
     length: { current: number; required?: number; valid: boolean };
     uppercase: { current: number; required?: number; valid: boolean };
