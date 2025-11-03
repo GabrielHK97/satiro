@@ -1,160 +1,109 @@
 # Serafim
 
-### Why Serafim?
+### Why Satiro?
 
-Serafim the portuguese word for Seraph. It is also an acronym of **Se**arch **R**equests **A**PI for TypeORM's **Fi**nd **M**ethod.
+Satiro is a small toolkit focused on schema assertions for Zod. The name is a play on the Portuguese word for Satyr and also stands for **S**chema **A**ssertion **T**ool and custom **I**mplementation for Zod's **R**ules and **O**bjects.
 
 ### What is the purpose of this package?
 
-This package aims to facilitate fetching custom data when using TypeORM, providing an API to make dynamic queries using JSON.
+This package provides a compact set of utilities to simplify password validation with Zod:
+
+- A schema creator that returns a Zod schema configured for password rules (length, character classes, etc.).
+- A standalone validator that runs password checks and returns a structured result (valid + errors/criteria).
+- A small React-friendly hook to evaluate password criteria in real time (useful for password inputs and UI feedback).
+
+These utilities make it easy to create consistent password assertions across validation layers (forms, APIs, unit tests) while keeping the rules declarative and reusable.
 
 ### Instalation
 
 ```
-npm install --save serafim
+npm install --save satiro
 ```
 
 ### Introduction and Usage
 
-Given the following entities and relationships:
+Below are short examples showing the three main pieces: schema creator, validator, and hook.
+
+Schema creator (Zod):
 
 ```jsx
-@Entity()
-export class User {
-	@PrimaryGeneratedColumn()
-	id: number;
+import { z } from 'zod';
+import { createPasswordSchema } from 'satiro';
 
-	@Column({type: 'varchar'})
-	username: string;
+// create a Zod schema for passwords with common requirements
+const passwordSchema = createPasswordSchema({
+  minLength: 8,
+  maxLength: 128,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumber: true,
+  requireSpecial: true,
+});
 
-	@Column({type: 'varchar'})
-	password: string;
-
-	@OneToOne(() => Person)
-	person: Person;
-
-	@OneToOne(() => ProfilePicture)
-	profilePicture: ProfilePicture;
+// use with zod
+const result = passwordSchema.safeParse('P@ssw0rd');
+if (!result.success) {
+  console.log(result.error.format());
 }
 ```
 
+Standalone validator:
+
 ```jsx
-@Entity()
-export class ProfilePicture {
-	@PrimaryGeneratedColumn()
-	id: number;
+import { validatePassword } from 'satiro';
+
+const check = validatePassword('P@ssw0rd', {
+  minLength: 8,
+  requireNumber: true,
+  requireUppercase: true,
+});
+
+console.log(check.valid); // true/false
+console.log(check.errors); // array of human-friendly messages or codes
+```
+
+React hook for realtime UI feedback:
+
+```jsx
+import React from 'react';
+import { usePasswordCriteria } from 'satiro';
+
+function PasswordInput() {
+  const { value, setValue, criteria } = usePasswordCriteria({
+    minLength: 8,
+    requireNumber: true,
+    requireUppercase: true,
+  });
+
+  return (
+    <div>
+      <input
+        type="password"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Enter password"
+      />
+      <ul>
+        {criteria.map((c) => (
+          <li key={c.id} style={{ color: c.passed ? 'green' : 'red' }}>
+            {c.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 ```
 
-```jsx
-@Entity()
-export class Person {
-	@PrimaryGeneratedColumn()
-	id: number;
+Why use these utilities?
 
-	@Column({type: 'varchar'})
-	name: string;
-
-	@Column({type: 'varchar'})
-	surname: string;
-
-	@OneToOne(() => Address)
-	address: Address;
-}
-```
-
-```jsx
-@Entity()
-export class Address {
-	@PrimaryGeneratedColumn()
-	id: number;
-
-	@Column({type: 'varchar'})
-	address: string;
-
-	@Column({type: 'int'})
-	zip: number;
-}
-```
-
-To extract custom information, you have to write custom queries, and there are two ways to do that in TypeORM. The first is to write queries using raw SQL, which uses the query method. The second way is to use the find method and specify the params. In both ways one would have to write an API, either to write custom raw SQL, either to customize the params. This package uses the latter, by translating JSON into meaningful params.
-
-Only using TypeORM:
-
-```jsx
-//frontend
-const search = {
-	relations: {
-		person: {
-			address: true
-		},
-		profilePicture: true
-	},
-	where: [
-		{
-			person: {
-				address: {
-					state: "NY"
-				}
-			}
-		},
-		{
-			profilePicture: {
-				id: 1
-			}
-		}
-	],
-	order: {
-		person: {
-			address: {
-				state: "ASC"
-			}
-		}
-	}
-}
-
-//backend
-userRepository.find({
-	relations: search.relations,
-	where: search.where,
-	order: search.order,
-})
-```
-
-Using Serafim:
-
-```jsx
-//frontend
-const search: Search = {
-	where: [
-		{
-			field: "person.address.state",
-			searchTerm: "NY",
-		},
-		{
-			field: "profilePicture.id",
-			searchTerm: 1
-		}
-	],
-	order: {
-		field: "person.address.state",
-		sortOrder: "ASC",
-	}
-};
-
-//backend
-userRepository.find({
-	relations: getRelations(search.where), // search.where, not search.relations
-	where: getWheres(search.where),
-	order: getOrders(search.order),
-})
-```
-
-With pure TypeORM, you need to know in advance what relations will be used in order to fetch custom data, whereas with Serafim, you just type what you need to fetch. With Serafim it is much easier as you can see!
+- Reuse the same validation logic across forms and server-side checks.
+- Keep rules declarative and configurable.
+- Provide clear, testable outputs for UI and logs.
 
 ### Documentation
 
-[Docs](https://serafim.gabrielhk.dev/)
+[Docs](https://satiro.gabrielhk.dev/)
 
 ### Donations
 

@@ -29,35 +29,35 @@ import { PasswordCriteriaErrorsEnum } from './enums/password-criteria-errors.enu
 
   let lengthValid = true;
   if (minLength !== undefined && currentLength < minLength) {
-    errors.push(`Password must be at least ${minLength} characters long`);
+    errors.push(PasswordCriteriaErrorsEnum.LENGTH);
     lengthValid = false;
   }
   if (maxLength !== undefined && currentLength > maxLength) {
-    errors.push(`Password must be no more than ${maxLength} characters long`);
+    errors.push(PasswordCriteriaErrorsEnum.LENGTH);
     lengthValid = false;
   }
 
   let uppercaseValid = true;
   if (minUppercase !== undefined && uppercaseCount < minUppercase) {
-    errors.push(`Password must contain at least ${minUppercase} uppercase letter${minUppercase > 1 ? 's' : ''}`);
+    errors.push(PasswordCriteriaErrorsEnum.UPPERCASE);
     uppercaseValid = false;
   }
 
   let lowercaseValid = true;
   if (minLowercase !== undefined && lowercaseCount < minLowercase) {
-    errors.push(`Password must contain at least ${minLowercase} lowercase letter${minLowercase > 1 ? 's' : ''}`);
+    errors.push(PasswordCriteriaErrorsEnum.LOWERCASE);
     lowercaseValid = false;
   }
 
   let digitsValid = true;
   if (minDigits !== undefined && digitsCount < minDigits) {
-    errors.push(`Password must contain at least ${minDigits} digit${minDigits > 1 ? 's' : ''}`);
+    errors.push(PasswordCriteriaErrorsEnum.DIGITS);
     digitsValid = false;
   }
 
   let specialCharsValid = true;
   if (minSpecialChars !== undefined && specialCharsCount < minSpecialChars) {
-    errors.push(`Password must contain at least ${minSpecialChars} special character${minSpecialChars > 1 ? 's' : ''}`);
+    errors.push(PasswordCriteriaErrorsEnum.SPECIAL_CHARS);
     specialCharsValid = false;
   }
 
@@ -97,15 +97,13 @@ import { PasswordCriteriaErrorsEnum } from './enums/password-criteria-errors.enu
 
 
 // Zod schema factory for password validation
-function createPasswordSchema(criteria: PasswordCriteria = {}) {
+function createPasswordSchema(criteria: PasswordCriteria = {}, message = '') {
   return z.string().refine(
     (password: string) => {
       const result = validatePassword(password, criteria);
       return result.isValid;
     },
-    {
-      message: 'Password does not meet the required criteria'
-    }
+    { message }
   );
 }
 
