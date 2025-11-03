@@ -1,0 +1,23 @@
+{
+  "name": "satiro",
+  "version": "1.0.0",
+  "description": "A library for custom password criteria for Zod",
+  "main": "index.js",
+  "scripts": {
+    "launch": "tsc && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielHK97/satiro.git"
+  },
+  "author": "Gabriel Kubota",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GabrielHK97/satiro/issues"
+  },
+  "homepage": "https://github.com/GabrielHK97/satiro#readme",
+  "dependencies": {
+    "typescript": "^5.9.3",
+    "zod": "^4.1.12"
+  }
+}
