@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import { PasswordCriteria } from './interfaces/password-criteria.interface';
-import { PasswordValidationResult } from './interfaces/password-validation-result.interface';
 import { PasswordCriteriaExamplesEnum } from './enums/password-criteria-examples.enum';
 
  function validatePassword(
   password: string,
   criteria: PasswordCriteria = {}
-): PasswordValidationResult {
+): boolean {
   const {
     minLength,
     maxLength,
@@ -52,45 +51,54 @@ import { PasswordCriteriaExamplesEnum } from './enums/password-criteria-examples
     specialCharsValid = false;
   }
 
-  return {
-    isValid: lengthValid && uppercaseValid && lowercaseValid && digitsValid && specialCharsValid,
-    details: {
-      length: { 
-        current: currentLength, 
-        required: minLength, 
-        valid: lengthValid 
-      },
-      uppercase: { 
-        current: uppercaseCount, 
-        required: minUppercase, 
-        valid: uppercaseValid 
-      },
-      lowercase: { 
-        current: lowercaseCount, 
-        required: minLowercase, 
-        valid: lowercaseValid 
-      },
-      digits: { 
-        current: digitsCount, 
-        required: minDigits, 
-        valid: digitsValid 
-      },
-      specialChars: { 
-        current: specialCharsCount, 
-        required: minSpecialChars, 
-        valid: specialCharsValid 
-      }
-    }
-  };
+  return lengthValid && uppercaseValid && lowercaseValid && digitsValid && specialCharsValid;
 }
 
-function createPasswordSchema(criteria: PasswordCriteria = {}, message = '') {
-  return z.string().refine(
-    (password: string) => {
-      const result = validatePassword(password, criteria);
-      return result.isValid;
-    },
-    { message }
-  );
+function createPasswordSchema(criteria: PasswordCriteria = {}) {
+  const {
+    minLength,
+    maxLength,
+    minUppercase,
+    minLowercase,
+    minDigits,
+    minSpecialChars,
+    specialCharsPattern = '!@#$%^&*()_+\\-=\\[\\]{};\':"\\|,.<>\\/?`~'
+  } = criteria;
+
+  let schema = z.string();
+
+  if (minLength !== undefined) {
+    schema = schema.min(minLength);
+  }
+  if (maxLength !== undefined) {
+    schema = schema.max(maxLength);
+  }
+
+  if (minUppercase !== undefined) {
+    schema = schema.refine(
+      (password) => (password.match(/[A-Z]/g) || []).length >= minUppercase
+    );
+  }
+
+  if (minLowercase !== undefined) {
+    schema = schema.refine(
+      (password) => (password.match(/[a-z]/g) || []).length >= minLowercase
+    );
+  }
+
+  if (minDigits !== undefined) {
+    schema = schema.refine(
+      (password) => (password.match(/\d/g) || []).length >= minDigits
+    );
+  }
+
+  if (minSpecialChars !== undefined) {
+    const specialCharsRegex = new RegExp(`[${specialCharsPattern}]`, 'g');
+    schema = schema.refine(
+      (password) => (password.match(specialCharsRegex) || []).length >= minSpecialChars
+    );
+  }
+
+  return schema;
 }
 export {  PasswordCriteriaExamplesEnum, validatePassword, createPasswordSchema };
