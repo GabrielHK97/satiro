@@ -16,8 +16,6 @@ import { PasswordCriteriaExamplesEnum } from './enums/password-criteria-examples
     minSpecialChars,
     specialCharsPattern = '!@#$%^&*()_+\\-=\\[\\]{};\':"\\|,.<>\\/?`~'
   } = criteria;
-
-  const errors: string[] = [];
   
   const uppercaseCount = (password.match(/[A-Z]/g) || []).length;
   const lowercaseCount = (password.match(/[a-z]/g) || []).length;
@@ -55,7 +53,7 @@ import { PasswordCriteriaExamplesEnum } from './enums/password-criteria-examples
   }
 
   return {
-    isValid: errors.length === 0,
+    isValid: lengthValid && uppercaseValid && lowercaseValid && digitsValid && specialCharsValid,
     details: {
       length: { 
         current: currentLength, 
