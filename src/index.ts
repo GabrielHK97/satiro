@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PasswordCriteria } from './interfaces/password-criteria.interface';
 import { PasswordCriteriaExamplesEnum } from './enums/password-criteria-examples.enum';
+import { PasswordCriteriaErrorsEnum } from './enums/password-criteria-errors.enum';
 
  function validatePassword(
   password: string,
@@ -68,37 +69,41 @@ function createPasswordSchema(criteria: PasswordCriteria = {}) {
   let schema = z.string();
 
   if (minLength !== undefined) {
-    schema = schema.min(minLength);
+    schema = schema.min(minLength, PasswordCriteriaErrorsEnum.TOO_SHORT);
   }
   if (maxLength !== undefined) {
-    schema = schema.max(maxLength);
+    schema = schema.max(maxLength, PasswordCriteriaErrorsEnum.TOO_LONG);
   }
 
   if (minUppercase !== undefined) {
     schema = schema.refine(
-      (password) => (password.match(/[A-Z]/g) || []).length >= minUppercase
+      (password) => (password.match(/[A-Z]/g) || []).length >= minUppercase,
+      PasswordCriteriaErrorsEnum.INVALID_UPPERCASE
     );
   }
 
   if (minLowercase !== undefined) {
     schema = schema.refine(
-      (password) => (password.match(/[a-z]/g) || []).length >= minLowercase
+      (password) => (password.match(/[a-z]/g) || []).length >= minLowercase,
+      PasswordCriteriaErrorsEnum.INVALID_LOWERCASE
     );
   }
 
   if (minDigits !== undefined) {
     schema = schema.refine(
-      (password) => (password.match(/\d/g) || []).length >= minDigits
+      (password) => (password.match(/\d/g) || []).length >= minDigits,
+      PasswordCriteriaErrorsEnum.INVALID_DIGITS
     );
   }
 
   if (minSpecialChars !== undefined) {
     const specialCharsRegex = new RegExp(`[${specialCharsPattern}]`, 'g');
     schema = schema.refine(
-      (password) => (password.match(specialCharsRegex) || []).length >= minSpecialChars
+      (password) => (password.match(specialCharsRegex) || []).length >= minSpecialChars,
+      PasswordCriteriaErrorsEnum.INVALID_SPECIAL_CHARS
     );
   }
 
   return schema;
 }
-export {  PasswordCriteriaExamplesEnum, validatePassword, createPasswordSchema };
+export {  PasswordCriteriaExamplesEnum, PasswordCriteriaErrorsEnum, validatePassword, createPasswordSchema };
