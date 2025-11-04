@@ -9,7 +9,7 @@ Satiro is a small toolkit focused on password validation for Zod. The name is a 
 This package provides a compact set of utilities to simplify password validation with Zod:
 
 - A schema creator that returns a Zod schema configured for password rules (length, character classes, etc.).
-- A standalone validator that runs password checks and returns a detailed structured result with validation status and character counts.
+- A standalone validator that runs password checks and returns a boolean result indicating validation status.
 - Predefined password criteria examples for common use cases.
 
 These utilities make it easy to create consistent password assertions across validation layers (forms, APIs, unit tests) while keeping the rules declarative and reusable.
@@ -22,7 +22,7 @@ npm install --save satiro
 
 ### Introduction and Usage
 
-Below are examples showing the three main functions: schema creator and validator.
+Below are examples showing the two main functions: schema creator and validator.
 
 #### Schema creator (Zod):
 
@@ -38,7 +38,7 @@ const passwordSchema = createPasswordSchema({
   minLowercase: 1,
   minDigits: 1,
   minSpecialChars: 1,
-}, 'Password does not meet the required criteria');
+});
 
 // Use with Zod
 const result = passwordSchema.safeParse('P@ssw0rd');
@@ -48,8 +48,7 @@ if (!result.success) {
 
 // Or use predefined criteria
 const strongPasswordSchema = createPasswordSchema(
-  PasswordCriteriaExamplesEnum.STRONG,
-  'Password must be strong'
+  PasswordCriteriaExamplesEnum.STRONG
 );
 ```
 
@@ -58,17 +57,17 @@ const strongPasswordSchema = createPasswordSchema(
 ```typescript
 import { validatePassword, PasswordCriteriaExamplesEnum } from 'satiro';
 
-const validation = validatePassword('P@ssw0rd', {
+const isValid = validatePassword('P@ssw0rd', {
   minLength: 8,
   minDigits: 1,
   minUppercase: 1,
   minSpecialChars: 1,
 });
 
-console.log(validation.isValid);
-console.log(validation.details);
+console.log(isValid); // true or false
 
 const basicValidation = validatePassword('mypassword', PasswordCriteriaExamplesEnum.BASIC);
+console.log(basicValidation); // true or false
 ```
 
 #### Predefined Criteria Examples
@@ -90,7 +89,8 @@ Why use these utilities?
 
 - Reuse the same validation logic across forms and server-side checks.
 - Keep rules declarative and configurable.
-- Provide clear, testable outputs for UI and logs.
+- Simple boolean return for quick validation checks.
+- Built-in integration with Zod for schema-based validation.
 
 ### Documentation
 
